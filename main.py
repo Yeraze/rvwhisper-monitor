@@ -41,15 +41,25 @@ p = re.compile('"ajax_nonce":"(\w+)"')
 ajax_nonce = p.search(r.text).group(1)
 print("Nonce is %s" % ajax_nonce)
 
-# retrieve data for a sensor
-data = dict()
-data['action'] = 'get_latest_data_by_date'
-data['sensor'] = config['DEFAULT']['sensorid']
-data['date_interval'] = 4
-data['browser_gmt_offset'] = -4
-data['charting'] = 'false'
-data['bt_nonce'] = ajax_nonce
-print("-> Fetching data for sensor %s" % data['sensor'])
-r = httpSession.post('https://access.rvwhisper.com/%s/wp-admin/admin-ajax.php' % config['DEFAULT']['id'], data = data)
-r.raise_for_status()
-print(r.text)
+# Also retrieve the basic list of sensors & ID's
+p = re.compile('sensor\?sensor_id=(\d+)" title="([\w\s]+)"')
+sensors = dict()
+iterator = p.finditer(r.text)
+for match in iterator:
+	print("-> Found sensor: %s (ID: %s)" % (match.group(2), match.group(1)))
+	sensors[match.group(2)] = match.group(1)
+
+print(sensors)
+
+# # retrieve data for a sensor
+# data = dict()
+# data['action'] = 'get_latest_data_by_date'
+# data['sensor'] = config['DEFAULT']['sensorid']
+# data['date_interval'] = 4
+# data['browser_gmt_offset'] = -4
+# data['charting'] = 'false'
+# data['bt_nonce'] = ajax_nonce
+# print("-> Fetching data for sensor %s" % data['sensor'])
+# r = httpSession.post('https://access.rvwhisper.com/%s/wp-admin/admin-ajax.php' % config['DEFAULT']['id'], data = data)
+# r.raise_for_status()
+# print(r.text)
