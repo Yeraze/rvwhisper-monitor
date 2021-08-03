@@ -2,6 +2,7 @@ import configparser
 import requests
 import re
 import json
+from datetime import datetime
 
 
 config = configparser.ConfigParser()
@@ -62,13 +63,38 @@ for sensor in sensors.keys():
 	print("-> Fetching data for sensor '%s' (%s)" % (sensor, sensors[sensor]))
 	r = httpSession.post('https://access.rvwhisper.com/%s/wp-admin/admin-ajax.php' % config['DEFAULT']['id'], data = data)
 	r.raise_for_status()
-	obj = json.loads(r.text)
-	json_str = json.dumps(obj, indent=4)
+	data = json.loads(r.text)
+
 	if (config['DEBUG']['printjson'] == '1'):
+		json_str = json.dumps(data, indent=4)
 		print(json_str)
 	if (config['DEBUG']['savejson'] == '1'):
 		filename = 'json/%s.json' % sensor
 		print('---> Writing to %s' % filename)
 		f = open(filename, 'w')
+		json_str = json.dumps(data, indent=4)
 		f.write(json_str)
 		f.close()
+
+	# These are the only fields we care about (Except for TimeStamp)
+	ImportantFields = ['DegreesF', 'PercentHumidity', 'Volts', 'DoorState']
+
+	# Start by finding how many of these "Important Fields" are in this dataset
+	NumFields = int(data['num_fields'])
+	FieldsRead = []
+	for i in range(1,NumFields+1):
+		fieldName = data['read_field']['read_field_%i' % i][0]
+		if (fieldName in ImportantFields):
+			print("[Field %i] = %s" % (i, fieldName))
+			FieldsRead.append(fieldName)
+		else:
+			print("[Field %i] = %s (Skipped)" % (i, fieldName))
+
+	# Now iterate over all the data in this fetch, and find the important fields	
+	for row in data['latest_points']:
+		dataRow = []
+		# Timestamp is a  Unix Epoch (Seconds elapsed)
+		dataRow.append("Timestamp %s [%s]" % (datetime.fromtimestamp(int(row['TimeStamp'])), row['TimeStamp']))
+		for field in FieldsRead:
+			dataRow.append("%s = %s" % (field, row[field]))
+		print(','.join(dataRow))
