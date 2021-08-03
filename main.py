@@ -64,4 +64,11 @@ for sensor in sensors.keys():
 	r.raise_for_status()
 	obj = json.loads(r.text)
 	json_str = json.dumps(obj, indent=4)
-	print(json_str)
+	if (config['DEBUG']['printjson'] == '1'):
+		print(json_str)
+	if (config['DEBUG']['savejson'] == '1'):
+		filename = 'json/%s.json' % sensor
+		print('---> Writing to %s' % filename)
+		f = open(filename, 'w')
+		f.write(json_str)
+		f.close()
