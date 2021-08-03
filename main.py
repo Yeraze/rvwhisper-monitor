@@ -1,6 +1,7 @@
 import configparser
 import requests
 import re
+import json
 
 
 config = configparser.ConfigParser()
@@ -49,17 +50,18 @@ for match in iterator:
 	print("-> Found sensor: %s (ID: %s)" % (match.group(2), match.group(1)))
 	sensors[match.group(2)] = match.group(1)
 
-print(sensors)
-
+for sensor in sensors.keys():
 # # retrieve data for a sensor
-# data = dict()
-# data['action'] = 'get_latest_data_by_date'
-# data['sensor'] = config['DEFAULT']['sensorid']
-# data['date_interval'] = 4
-# data['browser_gmt_offset'] = -4
-# data['charting'] = 'false'
-# data['bt_nonce'] = ajax_nonce
-# print("-> Fetching data for sensor %s" % data['sensor'])
-# r = httpSession.post('https://access.rvwhisper.com/%s/wp-admin/admin-ajax.php' % config['DEFAULT']['id'], data = data)
-# r.raise_for_status()
-# print(r.text)
+	data = dict()
+	data['action'] = 'get_latest_data_by_date'
+	data['sensor'] = sensors[sensor]
+	data['date_interval'] = 1
+	data['browser_gmt_offset'] = -4
+	data['charting'] = 'false'
+	data['bt_nonce'] = ajax_nonce
+	print("-> Fetching data for sensor '%s' (%s)" % (sensor, sensors[sensor]))
+	r = httpSession.post('https://access.rvwhisper.com/%s/wp-admin/admin-ajax.php' % config['DEFAULT']['id'], data = data)
+	r.raise_for_status()
+	obj = json.loads(r.text)
+	json_str = json.dumps(obj, indent=4)
+	print(json_str)
