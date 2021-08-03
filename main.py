@@ -3,7 +3,7 @@ import requests
 import re
 import json
 from datetime import datetime
-
+import sqlite3
 
 config = configparser.ConfigParser()
 config.read('rvwhisper.ini')
@@ -60,6 +60,14 @@ for sensor in sensors.keys():
 	data['browser_gmt_offset'] = -4
 	data['charting'] = 'false'
 	data['bt_nonce'] = ajax_nonce
+
+	db = None
+	print("-> Creating DB for sensor %s" % sensors[sensor])
+	try:
+		db = sqlite3.connect("sensor-%s.db" % sensors[sensor])
+	except sqlite3.Error as e:
+		print(e)
+	
 	print("-> Fetching data for sensor '%s' (%s)" % (sensor, sensors[sensor]))
 	r = httpSession.post('https://access.rvwhisper.com/%s/wp-admin/admin-ajax.php' % config['DEFAULT']['id'], data = data)
 	r.raise_for_status()
@@ -89,12 +97,33 @@ for sensor in sensors.keys():
 			FieldsRead.append(fieldName)
 		else:
 			print("[Field %i] = %s (Skipped)" % (i, fieldName))
+	
+	# So if we found fields to read, verify the DB exists
+	if ((db) and (len(FieldsRead) > 0)):
+		try:
+			c = db.cursor()
+			c.execute("""CREATE TABLE IF NOT EXISTS data (
+							timestamp integer,
+							fieldname text,
+							value text,
+							PRIMARY KEY (timestamp, fieldname));""")
+		except sqlite3.Error as e:
+			print(e)
 
-	# Now iterate over all the data in this fetch, and find the important fields	
-	for row in data['latest_points']:
-		dataRow = []
-		# Timestamp is a  Unix Epoch (Seconds elapsed)
-		dataRow.append("Timestamp %s [%s]" % (datetime.fromtimestamp(int(row['TimeStamp'])), row['TimeStamp']))
-		for field in FieldsRead:
-			dataRow.append("%s = %s" % (field, row[field]))
-		print(','.join(dataRow))
+		# Now iterate over all the data in this fetch, and find the important fields	
+		for row in data['latest_points']:
+			for field in FieldsRead:
+				try:
+					c = db.cursor()
+					c.execute("""INSERT INTO data(timestamp, fieldname, value) 
+									VALUES(?,?,?)""", 
+								(row['TimeStamp'], field, row[field]))
+					db.commit()
+				except sqlite3.Error as e:
+					print(e)
+	else:
+		print("*** No valid data fields found!")
+
+	# if the DB was opened, make sure to close it.
+	if(db):
+		db.close()
