@@ -3,6 +3,8 @@ import configparser
 from datetime import datetime
 
 
+color=['red', 'green', 'blue', 'orange', 'yellow', 'purple']
+
 output = open("graph.html", "w")
 # Write out the HTML Header
 output.write("""<html>
@@ -22,6 +24,7 @@ config.read('rvwhisper.ini')
 
 graphPeriod = config.get('GRAPH', 'period', fallback="-30 days")
 print("Graphing data over period: %s" % graphPeriod)
+chartCount = 0
 
 for db in config['GRAPH']['db'].split(','):
 	title = config.get('GRAPH', db, fallback = db)
@@ -61,7 +64,11 @@ for db in config['GRAPH']['db'].split(','):
 			for row in rows:
 				dataString.append('{x: %s, y: %s}' % (row[0], row[1]))
 			output.write(','.join(dataString))
-			output.write("""] }, """)
+			output.write("""],
+				borderColor: '%s',
+				backgroundColor: '%s',
+				}, """ % (color[chartCount], color[chartCount]))
+			chartCount += 1
 		except sqlite3.Error as e:
 			print(e)
 
