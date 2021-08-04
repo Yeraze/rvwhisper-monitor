@@ -64,7 +64,7 @@ for sensor in sensors.keys():
 	db = None
 	print("-> Creating DB for sensor %s" % sensors[sensor])
 	try:
-		db = sqlite3.connect("sensor-%s.db" % sensors[sensor])
+		db = sqlite3.connect("%s.db" % sensor)
 	except sqlite3.Error as e:
 		print(e)
 	
