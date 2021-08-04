@@ -8,7 +8,7 @@ import sqlite3
 config = configparser.ConfigParser()
 config.read('rvwhisper.ini')
 
-print("Reading parameters for %s" % config['DEFAULT']['id'])
+print("Reading parameters for %s" % config['RVWHISPER']['id'])
 
 bt_basic_ajax = 'https://access.rvwhisper.com/%s/wp-admin/admin-ajax.php'
 
@@ -36,7 +36,7 @@ r.raise_for_status()
 # ok, now we are logged in.. Fetch the dashboard and retrieve the Nonce and UserID
 
 print("-> Fetching dashboard")
-r = httpSession.get('https://access.rvwhisper.com/%s' % config['DEFAULT']['id'])
+r = httpSession.get('https://access.rvwhisper.com/%s' % config['RVWHISPER']['id'])
 r.raise_for_status()
 
 p = re.compile('"ajax_nonce":"(\w+)"')
@@ -69,7 +69,7 @@ for sensor in sensors.keys():
 		print(e)
 	
 	print("-> Fetching data for sensor '%s' (%s)" % (sensor, sensors[sensor]))
-	r = httpSession.post('https://access.rvwhisper.com/%s/wp-admin/admin-ajax.php' % config['DEFAULT']['id'], data = data)
+	r = httpSession.post('https://access.rvwhisper.com/%s/wp-admin/admin-ajax.php' % config['RVWHISPER']['id'], data = data)
 	r.raise_for_status()
 	data = json.loads(r.text)
 
