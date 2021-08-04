@@ -5,11 +5,16 @@ from datetime import datetime
 
 color=['red', 'green', 'blue', 'orange', 'yellow', 'purple']
 
-output = open("graph.html", "w")
+config = configparser.ConfigParser()
+config.read('rvwhisper.ini')
+
+output = open(config.get('GRAPH', 'output', fallback='graph.html'), "w")
 # Write out the HTML Header
 output.write("""<html>
 <head>
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.0"></script>
+	<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.1.1"></script>
 	<title>RVWhisper Graphs</title>
 </head>
 <body>
@@ -19,8 +24,6 @@ chartData = {
 	datasets: [
 """)
 
-config = configparser.ConfigParser()
-config.read('rvwhisper.ini')
 
 graphPeriod = config.get('GRAPH', 'period', fallback="-30 days")
 print("Graphing data over period: %s" % graphPeriod)
@@ -105,6 +108,17 @@ output.write("""
     data: chartData,
     options: {
 	plugins: {
+		zoom: {
+			pan: {
+				enabled: true,
+				mode: 'xy'
+			},
+			zoom: {
+				wheel: {
+					enabled: true
+				}
+			}
+		},
 		tooltip: {
 			callbacks: {
 				label: function(context) {
