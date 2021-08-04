@@ -25,6 +25,7 @@ config.read('rvwhisper.ini')
 graphPeriod = config.get('GRAPH', 'period', fallback="-30 days")
 print("Graphing data over period: %s" % graphPeriod)
 chartCount = 0
+foundFields = []
 
 for db in config['GRAPH']['db'].split(','):
 	title = config.get('GRAPH', db, fallback = db)
@@ -53,6 +54,11 @@ for db in config['GRAPH']['db'].split(','):
 
 	# For each field, retrieve the data for the last period
 	for field in fields:
+		if field in foundFields:
+			print("Already used this field...")
+		else:
+			foundFields.append(field)
+
 		try:
 			output.write("""{ type: 'scatter',
 					  label: '%s - %s', 
@@ -75,10 +81,10 @@ for db in config['GRAPH']['db'].split(','):
 				for row in rows:
 					dataString.append('{x: %s, y: %s}' % (row[0], row[1]))
 			output.write(','.join(dataString))
-			output.write("""],
-				borderColor: '%s',
-				backgroundColor: '%s',
-				}, """ % (color[chartCount], color[chartCount]))
+			output.write("],")
+			output.write("borderColor: '%s'," % color[chartCount])
+			output.write("backgroundColor: '%s'" % color[chartCount])
+			output.write("},")
 			chartCount += 1
 		except sqlite3.Error as e:
 			print(e)
@@ -88,10 +94,12 @@ for db in config['GRAPH']['db'].split(','):
 		conn.close()
 
 
+# Now, write out the weather
+output.write(" {} ")
 
 # Write out the HTML Footer
 output.write("""
-  {} ] };
+   ] };
   const config = {
     type: "scatter",
     data: chartData,
@@ -111,7 +119,22 @@ output.write("""
 			}
 		}
 	},
-	scales: {
+	scales: {""")
+side = "left"
+for field in foundFields:
+	output.write("""
+		%s: {"""% field)
+	if (config.get(field, 'min', fallback = None)):
+		output.write("min: %s," % config.get(field, 'min'))
+	if (config.get(field, 'max', fallback = None)):
+		output.write("max: %s," % config.get(field, 'max'))
+	output.write('position: "%s"' % side)
+	if (side == "left"):
+		side = "right"
+	else:
+		side = "left"
+	output.write("},")
+output.write("""
 		x: {
 			ticks: {
 				callback: function(value, index, values) {
