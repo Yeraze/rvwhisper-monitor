@@ -56,7 +56,8 @@ for db in config['GRAPH']['db'].split(','):
 		try:
 			output.write("""{ type: 'scatter',
 					  label: '%s - %s', 
-					  data: [""" % (title, field))
+					  yAxisID: '%s',
+					  data: [""" % (title, field, field))
 	
 			c.execute('SELECT timestamp,value FROM data WHERE timestamp > strftime("%%s", datetime("now", "%s")) AND fieldname = "%s"' % (graphPeriod, field))
 			rows = c.fetchall()
@@ -92,7 +93,7 @@ output.write("""
 
 					var d = new Date(0);
 					d.setUTCSeconds(context.parsed.x);
-					var label = [d];
+					var label = [d.toLocaleString()];
 					label.push(context.dataset.label + " = " + context.parsed.y);
 					
 					return label;
@@ -106,7 +107,7 @@ output.write("""
 				callback: function(value, index, values) {
 					var d = new Date(0);
 					d.setUTCSeconds(value);
-					return d;
+					return d.toLocaleString();
 				}
 			}
 		}
