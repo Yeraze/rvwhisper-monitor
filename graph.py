@@ -77,7 +77,34 @@ output.write("""
   const config = {
     type: "scatter",
     data: chartData,
-    options: {}
+    options: {
+	plugins: {
+		tooltip: {
+			callbacks: {
+				label: function(context) {
+
+					var d = new Date(0);
+					d.setUTCSeconds(context.parsed.x);
+					var label = [d];
+					label.push(context.dataset.label + " = " + context.parsed.y);
+					
+					return label;
+				}
+			}
+		}
+	},
+	scales: {
+		x: {
+			ticks: {
+				callback: function(value, index, values) {
+					var d = new Date(0);
+					d.setUTCSeconds(value);
+					return d;
+				}
+			}
+		}
+	}
+    }
   };
   var myChart = new Chart(
     document.getElementById('myChart'),
