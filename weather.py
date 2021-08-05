@@ -22,18 +22,21 @@ except sqlite3.Error as e:
 c = conn.cursor()
 c.execute("""CREATE TABLE IF NOT EXISTS weather (
 		timestamp integer PRIMARY KEY,
-		temp integer,
+		temp real,
+		humidity integer,
 		weather text,
 		sunrise integer,
-		sunset integer);""")
+		sunset integer,
+		json text);""")
 
 weather = json.loads(r.text)
 
 print(json.dumps(weather, indent=4))
 
 c = conn.cursor();
-c.execute("""INSERT INTO weather(timestamp,temp,weather,sunrise,sunset) VALUES(?,?,?,?,?)""",
-	(weather["dt"], weather["main"]["temp"], weather["weather"][0]["main"], weather["sys"]["sunrise"], weather["sys"]["sunset"]) )
+c.execute("""INSERT INTO weather(timestamp,temp,humidity,weather,sunrise,sunset,json) VALUES(?,?,?,?,?,?,?)""",
+	(weather["dt"], (float(weather["main"]["temp"]) - 273.15) * 9.0/5.0 + 32.0, weather["main"]["humidity"], 
+	weather["weather"][0]["main"], weather["sys"]["sunrise"], weather["sys"]["sunset"], r.text) )
 conn.commit()
 
 conn.close()
