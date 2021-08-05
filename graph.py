@@ -63,10 +63,13 @@ for db in config['GRAPH']['db'].split(','):
 			foundFields.append(field)
 
 		try:
-			output.write("""{ type: 'scatter',
+			output.write("""{ type: 'line',
 					  label: '%s - %s', 
 					  yAxisID: '%s',
 					  showLine: true,
+					  cubicInterpolationMode: 'default',
+					  tension: 0.2,
+					  radius: 0,
 					  data: [""" % (title, field, field))
 	
 			c.execute('SELECT timestamp,value FROM data WHERE timestamp > strftime("%%s", datetime("now", "%s")) AND fieldname = "%s"' % (graphPeriod, field))
@@ -104,9 +107,15 @@ output.write(" {} ")
 output.write("""
    ] };
   const config = {
-    type: "scatter",
+    type: "line",
     data: chartData,
     options: {
+        parsing: false,
+        interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+        },
 	plugins: {
 		zoom: {
 			pan: {
@@ -118,6 +127,12 @@ output.write("""
 					enabled: true
 				}
 			}
+		},
+		decimation: {
+			enabled: true,
+			algorithm: 'lttb',
+			samples: 200,
+			threshold: 500,
 		},
 		tooltip: {
 			callbacks: {
@@ -150,6 +165,7 @@ for field in foundFields:
 	output.write("},")
 output.write("""
 		x: {
+			type: 'linear',
 			ticks: {
 				callback: function(value, index, values) {
 					var d = new Date(0);
