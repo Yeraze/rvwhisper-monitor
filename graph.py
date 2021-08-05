@@ -88,6 +88,8 @@ for db in config['GRAPH']['db'].split(','):
 					dataString.append('{x: %s, y: %s}' % (row[0], row[1]))
 			output.write(','.join(dataString))
 			output.write("],")
+			if (field == "DoorState"):
+				output.write("fill: 'origin',")
 			output.write("borderColor: '%s'," % color[chartCount])
 			output.write("backgroundColor: '%s'" % color[chartCount])
 			output.write("},")
@@ -152,7 +154,11 @@ output.write("""
 side = "left"
 for field in foundFields:
 	output.write("""
-		%s: {"""% field)
+		%s: {
+			title: {
+				display: true,
+				text: '%s'
+			},"""% (field, field))
 	if (config.get(field, 'min', fallback = None)):
 		output.write("min: %s," % config.get(field, 'min'))
 	if (config.get(field, 'max', fallback = None)):
