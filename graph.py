@@ -72,7 +72,7 @@ for db in config['GRAPH']['db'].split(','):
 					  radius: 0,
 					  data: [""" % (title, field, field))
 	
-			c.execute('SELECT timestamp,value FROM data WHERE timestamp > strftime("%%s", datetime("now", "%s")) AND fieldname = "%s"' % (graphPeriod, field))
+			c.execute('SELECT timestamp,value FROM data WHERE timestamp > strftime("%%s", datetime("now", "%s")) AND fieldname = "%s" ORDER BY timestamp' % (graphPeriod, field))
 			rows = c.fetchall()
 			dataString = []
 			if (field == "DoorState"):
@@ -103,7 +103,55 @@ for db in config['GRAPH']['db'].split(','):
 
 
 # Now, write out the weather
-output.write(" {} ")
+try:
+	conn = sqlite3.connect('weather.db')
+	c = conn.cursor()
+
+	c.execute('SELECT timestamp,temp,humidity,sunrise,sunset FROM weather WHERE timestamp > strftime("%%s", datetime("now", "%s")) ORDER BY timestamp' % (graphPeriod))
+	rows = c.fetchall()
+	
+	# First write out the environmental temp
+	output.write("""{ type: 'line',
+			  label: 'Weather - Temperature', 
+			  yAxisID: 'DegreesF',
+			  showLine: true,
+			  cubicInterpolationMode: 'default',
+			  tension: 0.2,
+			  radius: 0,
+			  data: [""")
+	dataString = []
+	for row in rows:
+		dataString.append('{x: %s, y: %s}' % (row[0], row[1]))
+	
+	output.write(','.join(dataString))
+	output.write("],")
+	output.write("borderColor: '#bbbbaa'," )
+	output.write("backgroundColor: '#bbbbaa'" )
+	output.write("},")
+	
+	# Now write out the environmental Humidity
+	output.write("""{ type: 'line',
+			  label: 'Weather - Humidity', 
+			  yAxisID: 'PercentHumidity',
+			  showLine: true,
+			  cubicInterpolationMode: 'default',
+			  tension: 0.2,
+			  radius: 0,
+			  data: [""")
+	dataString = []
+	for row in rows:
+		dataString.append('{x: %s, y: %s}' % (row[0], row[2]))
+	
+	output.write(','.join(dataString))
+	output.write("],")
+	output.write("borderColor: '#bbbbee'," )
+	output.write("backgroundColor: '#bbbbee'" )
+	output.write("}")
+	
+
+	conn.close()
+except sqlite3.Error as e:
+	print(e)
 
 # Write out the HTML Footer
 output.write("""
