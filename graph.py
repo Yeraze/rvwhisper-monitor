@@ -175,8 +175,8 @@ try:
 	
 	output.write(','.join(dataString))
 	output.write("],")
-	output.write("borderColor: '#333333'," )
-	output.write("backgroundColor: '#333333'," )
+	output.write("borderColor: 'rgba(64, 64, 64, 0.5)'," )
+	output.write("backgroundColor: 'rgba(64,64,64,0.5)'," )
 	output.write("fill: 'origin'" )
 	output.write("}")
 	
@@ -194,7 +194,7 @@ output.write("""
     options: {
         parsing: false,
         interaction: {
-                mode: 'nearest',
+                mode: 'x',
                 axis: 'x',
                 intersect: false
         },
