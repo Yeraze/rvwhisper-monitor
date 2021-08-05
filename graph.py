@@ -74,6 +74,21 @@ for db in config['GRAPH']['db'].split(','):
 	
 			c.execute('SELECT timestamp,value FROM data WHERE timestamp > strftime("%%s", datetime("now", "%s")) AND fieldname = "%s" ORDER BY timestamp' % (graphPeriod, field))
 			rows = c.fetchall()
+
+			delta = int(config.get('GRAPH', field+"smooth", fallback = 0))
+			if delta > 0:
+				# Smoothing of this datatype is enabled.
+				print("Smoothing")
+				smoothedRows = []
+				for i in range(0,len(rows)):
+					minData = max(i - delta, 0)
+					maxData = min(i + delta, len(rows))
+					slice = rows[minData:maxData+1]
+					dataSum = 0
+					for entry in slice:
+						dataSum += float(entry[1])
+					smoothedRows.append( (rows[i][0], dataSum / len(slice)) )
+				rows = smoothedRows
 			dataString = []
 			if (field == "DoorState"):
 				# Special handling for doors.. Doors have "Just Opened", "Just Closed", and "Still Closed" and "Still Open"
