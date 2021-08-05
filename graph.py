@@ -146,6 +146,38 @@ try:
 	output.write("],")
 	output.write("borderColor: '#bbbbee'," )
 	output.write("backgroundColor: '#bbbbee'" )
+	output.write("}, ")
+
+	# Now write out the Sun state line
+
+	output.write("""{ type: 'line',
+			  label: 'Sun', 
+			  yAxisID: 'DoorState',
+			  showLine: true,
+			  cubicInterpolationMode: 'default',
+			  tension: 0.2,
+			  radius: 0,
+			  data: [""")
+	dataString = []
+	for row in rows:
+		tNow = int(row[0])
+		tSunrise = int(row[3])
+		tSunset = int(row[4])
+		# If the timestamp is between the Sunrise & Sunset times, assume the sun is up
+		# Now, since we'll be coloring _under_ the line, we need to invert the result
+		if tNow > tSunrise and tNow < tSunset:
+			# Sun is UP
+			dataString.append('{x: %s, y: 0}' % (row[0]))
+		else:
+			# Sun has SET
+			dataString.append('{x: %s, y: 1}' % (row[0]))
+
+	
+	output.write(','.join(dataString))
+	output.write("],")
+	output.write("borderColor: '#333333'," )
+	output.write("backgroundColor: '#333333'," )
+	output.write("fill: 'origin'" )
 	output.write("}")
 	
 
