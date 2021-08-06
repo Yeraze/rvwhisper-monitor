@@ -1,0 +1,211 @@
+#!/usr/bin/python3
+
+import sys, getopt
+import numpy
+import sqlite3
+
+def usage():
+	print('slope.py -i <input SQLite DB> -o <output HTML file> -f <Field Name> [-w <Width # (Default 10)>] [-d <Duration, Default -30 days>]')
+
+def loadData(dbFile, field, duration):
+	rows=[]
+	try:
+		conn = sqlite3.connect(dbFile)
+		c = conn.cursor()
+		c.execute('SELECT timestamp,value FROM data WHERE timestamp > strftime("%%s", datetime("now", "%s")) AND fieldname = "%s" ORDER BY timestamp' % (duration, field))
+		rows = c.fetchall()
+		conn.close()
+
+	except sqlite3.Error as e:
+		print(e)
+		sys.exit(2)
+		
+	return rows
+
+
+def main(argv):
+	inFile = ''
+	inField = ''
+	outFile = ''
+	width = 10
+	duration = "-30 days"
+
+	if len(argv) < 1:
+		usage()
+		sys.exit(2)
+
+	try:
+		opts, args = getopt.getopt(argv, "i:o:f:w:d", ["input=", "output=", "field=", "width=", "duration="])
+	except getopt.GetoptError as err:
+		print(err)
+		usage()
+		sys.exit(2)
+
+
+	for opt, arg in opts:
+		if opt in ("-i", "--input"):
+			inFile = arg
+		elif opt in ("-o", "--output"):
+			outFile = arg
+		elif opt in ("-f", "--field"):
+			inField = arg
+		elif opt in ("-w", "--width"):
+			width = int(arg)
+		elif opt in ("-d", "--duration"):
+			duration = arg
+
+	print("Reading '%s' from '%s" % (inField, inFile))
+	print("Calculating over %i samples, and writing to  '%s'" % (width, outFile))
+
+
+	data = loadData(inFile, inField, duration)
+	print("-> Loaded %i rows of data" % len(data))
+
+	outData = []
+	outValues = []
+	for i in range(0, len(data)):
+		minData = max(i - width, 0)
+		maxData = min(i + width, len(data))
+		slice = data[minData:maxData+1]
+
+		yVals = []
+		xVals = []
+		for num in slice:
+			xVals.append( int(num[0])  - int(slice[0][0]))
+			yVals.append( float(num[1]) )
+	
+		model = numpy.polyfit(xVals,yVals,1)	
+
+		outData.append( (data[i][0], model[0]) )
+		outValues.append(model[0])
+		
+	absMax = max( abs(min(outValues)), max(outValues))
+	histModel = numpy.histogram(outValues, bins = 50, range = (-absMax, absMax))
+	output = open(outFile, 'w')
+	output.write("""<html>
+	<head>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.0"></script>
+		<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.1.1"></script>
+		<title>RVWhisper Graphs</title>
+	</head>
+	<body>
+		<div style="width: 49%%; float: left">
+			<canvas id="myChart"></canvas>
+		</div>
+		<div style="width: 49%%; float:right">
+			<canvas id="histogram"></canvas>
+		</div>
+	<script>
+	chartData = {
+		datasets: [
+			{ type: 'line',
+					  label: 'Slope of %s', 
+					  showLine: true,
+					  cubicInterpolationMode: 'default',
+					  tension: 0.2,
+					  radius: 0,
+					  data: [""" % (inField))
+	dataString = []
+	for row in outData:
+		dataString.append('{x: %s, y: %s}' % (row[0], row[1]))
+	output.write(','.join(dataString))
+	output.write("],")
+	output.write("borderColor: 'red',")
+	output.write("backgroundColor: 'red'")
+	output.write("} ] };")
+
+	output.write("""
+	dataHistogram = {
+		labels: [""")
+	histLabels = []
+	for i in range(0, len(histModel[1])-1):
+		histLabels.append("'%s - %s'" % (histModel[1][i], histModel[1][i+1]))
+	output.write(','.join(histLabels))
+	output.write(""" 
+		],
+		datasets: [
+			{ type: 'bar',
+					  label: 'Histogram of Slope of %s', 
+					  data: [ %s ]
+		        } ] };""" % (inField, ','.join(map(str,histModel[0]))))
+	output.write("""
+  const config = {
+    type: "line",
+    data: chartData,
+    options: {
+        parsing: false,
+        interaction: {
+                mode: 'x',
+                axis: 'x',
+                intersect: false
+        },
+	plugins: {
+		zoom: {
+			pan: {
+				enabled: true,
+				mode: 'xy'
+			},
+			zoom: {
+				wheel: {
+					enabled: true
+				}
+			}
+		},
+		tooltip: {
+			callbacks: {
+				label: function(context) {
+
+					var d = new Date(0);
+					d.setUTCSeconds(context.parsed.x);
+					var label = [d.toLocaleString()];
+					label.push(context.dataset.label + " = " + context.parsed.y);
+					
+					return label;
+				}
+			}
+		}
+	},
+	scales: {
+		x: {
+			type: 'linear',
+			ticks: {
+				callback: function(value, index, values) {
+					var d = new Date(0);
+					d.setUTCSeconds(value);
+					return d.toLocaleString();
+				}
+			}
+		}
+	}
+    }
+  };
+  var myChart = new Chart(
+    document.getElementById('myChart'),
+    config
+  );""")
+
+	output.write("""
+  const histConfig = {
+    type: "bar",
+    data: dataHistogram};
+
+  var chart2 = new Chart(
+    document.getElementById('histogram'),
+    histConfig
+  );
+</script>
+</body>
+</html>""")
+	output.close()
+
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+	main(sys.argv[1:])
