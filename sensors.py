@@ -56,7 +56,7 @@ for sensor in sensors.keys():
 	data = dict()
 	data['action'] = 'get_latest_data_by_date'
 	data['sensor'] = sensors[sensor]
-	data['date_interval'] = 1
+	data['date_interval'] = config.get('SENSORS', 'duration', fallback = 1)
 	data['browser_gmt_offset'] = -4
 	data['charting'] = 'false'
 	data['bt_nonce'] = ajax_nonce
