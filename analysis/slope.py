@@ -121,7 +121,7 @@ def main(argv):
 		labels: [""")
 	histLabels = []
 	for i in range(0, len(histModel[1])-1):
-		histLabels.append("'%s - %s'" % (histModel[1][i], histModel[1][i+1]))
+		histLabels.append("'{a:.3f} - {b:.3f}'".format(a = float(histModel[1][i]), b= float(histModel[1][i+1])))
 	output.write(','.join(histLabels))
 	output.write(""" 
 		],
