@@ -76,8 +76,9 @@ def main(argv):
 	
 		model = numpy.polyfit(xVals,yVals,1)	
 
-		outData.append( (data[i][0], model[0]) )
-		outValues.append(model[0])
+		# *3600 = Converting from Seconds to Hours
+		outData.append( (data[i][0], model[0] * 3600) )
+		outValues.append(model[0] * 3600)
 		
 	absMax = max( abs(min(outValues)), max(outValues))
 	histModel = numpy.histogram(outValues, bins = 50, range = (-absMax, absMax))
@@ -100,7 +101,7 @@ def main(argv):
 	chartData = {
 		datasets: [
 			{ type: 'line',
-					  label: 'Slope of %s', 
+					  label: 'Estimated Change of %s per Hour', 
 					  showLine: true,
 					  cubicInterpolationMode: 'default',
 					  tension: 0.2,
@@ -126,7 +127,7 @@ def main(argv):
 		],
 		datasets: [
 			{ type: 'bar',
-					  label: 'Histogram of Slope of %s', 
+					  label: 'Histogram of Change in %s', 
 					  data: [ %s ]
 		        } ] };""" % (inField, ','.join(map(str,histModel[0]))))
 	output.write("""
