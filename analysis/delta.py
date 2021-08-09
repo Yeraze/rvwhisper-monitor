@@ -157,7 +157,8 @@ def main(argv):
 	output.write(','.join(dataString))
 	output.write("],\n")
 	output.write("borderColor: 'red',\n")
-	output.write("backgroundColor: 'red'\n")
+	output.write("backgroundColor: 'rgba(255, 0,0,0.5)',\n")
+	output.write("fill: 'origin'")
 	output.write("""},
 			{type: 'line',  
 					  label: 'Difference in Humidity',
@@ -173,7 +174,8 @@ def main(argv):
 	output.write(','.join(dataString))
 	output.write("],")
 	output.write("borderColor: 'blue',")
-	output.write("backgroundColor: 'blue'")
+	output.write("backgroundColor: 'rgba(0, 0,255,0.5)',\n")
+	output.write("fill: 'origin'")
 	output.write("} ] };")
 
 	output.write("""
