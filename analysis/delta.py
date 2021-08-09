@@ -102,14 +102,16 @@ def main(argv):
 	rtTimestamp = []
 	rtData = []
 	for data in rowsTemp:
-		rtTimestamp.append( int(data[0]) )
-		rtData.append( float(data[1]) )
+		if int(data[0]) > int(rowsWeather[0][0]):
+			rtTimestamp.append( int(data[0]) )
+			rtData.append( float(data[1]) )
 
 	rhTimestamp = []
 	rhData = []
 	for data in rowsHumidity:
-		rhTimestamp.append( int(data[0]) )
-		rhData.append( float(data[1]) )
+		if int(data[0]) > int(rowsWeather[0][0]):
+			rhTimestamp.append( int(data[0]) )
+			rhData.append( float(data[1]) )
 		
 
 	wTimestamp = []
@@ -122,8 +124,8 @@ def main(argv):
 
 	# Now interpolate the Weather data (wTemp/wHumidity) to the rh/rt Timestamps
 	# thankfully numpy has oneliners for this
-	interp_wTemp = numpy.interp( rtTimestamp, wTimestamp, wTemp)
-	interp_wHumidity = numpy.interp( rhTimestamp, wTimestamp, wHumidity)
+	interp_wTemp = numpy.interp( rtTimestamp, wTimestamp, wTemp, left = 0, right = 0)
+	interp_wHumidity = numpy.interp( rhTimestamp, wTimestamp, wHumidity, left = 0, right = 0)
 
 	# Again, numpy one-liners.. Compute the delta between the Sensor & the interpolated Weather
 	deltaTemp = numpy.subtract(rtData, interp_wTemp)
