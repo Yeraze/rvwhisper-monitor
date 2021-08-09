@@ -189,7 +189,22 @@ def main(argv):
 	output.write("""
   const histConfig = {
     type: "bar",
-    data: dataHistogram};
+    data: dataHistogram,
+    options: {
+	plugins: {
+		zoom: {
+			pan: {
+				enabled: true,
+				mode: 'xy'
+			},
+			zoom: {
+				wheel: {
+					enabled: true
+				}
+			}
+		}
+	}
+    }};
 
   var chart2 = new Chart(
     document.getElementById('histogram'),
