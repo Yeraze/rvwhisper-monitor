@@ -94,7 +94,9 @@ via:
 ./slope.py -i ../Engine\ battery.db -f Volts -w 10 -o /var/www/html/graph/volts.html
 ```
 This looks at the Engine Battery state and shows the variance over the last 30 days in both 
-a line chart and a histogram, with the histogram showing a slight drain on the battery over time.
+a line chart and a histogram.  As you can see in the chart above, and in the delta line-chart, there
+is a solar panel recharging the battery every day. However, the histogram proves that despite the recharging
+I have a slight drain on the battery over time.
 
 # temp.html
 [temp.html](https://yeraze.github.io/rvwhisper-monitor/samples/temp.html) - Shows the result of the `delta.py` analysis tool, as executed via:
