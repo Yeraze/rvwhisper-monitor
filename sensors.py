@@ -107,7 +107,8 @@ def main(argv):
             f.close()
 
         # These are the only fields we care about (Except for TimeStamp)
-        ImportantFields = ['DegreesF', 'PercentHumidity', 'Volts', 'DoorState']
+        ImportantFields = config.get("SENSORS", "fields", fallback="DegreesF,PercentHumidity,Volts,DoorState").split(',')
+        print("Reading fields %s" % ImportantFields)
 
         # Start by finding how many of these "Important Fields" are in this dataset
         NumFields = int(data['num_fields'])
