@@ -1,6 +1,6 @@
 # rvwhisper-monitor
 
-This is a collection fo scripts to collect data from an RVWhisper system (available at https://rvwhisper.com/) and 
+This is a collection of scripts to collect data from an RVWhisper system (available at https://rvwhisper.com/) and 
 store it locally in a collection of SQLite3 databases.  It can also poll local weather information from OpenWeather. 
 
 Once the data is collected, it can create dynamic graphs (thanks to Chart.js) and perform some rudimentary analysis.
@@ -47,7 +47,7 @@ printjson = 0
 savejson = 0
 ```
 
-This INI file (called `rvwhisper.ini` ) specifies your authentication details for RVwhisper & OpenWeather, your
+This INI file (called `rvwhisper.ini` by default ) specifies your authentication details for RVwhisper & OpenWeather, your
 local ID instance to monitor, and various parameters about what data to graph and how.
 
 # Scripts
