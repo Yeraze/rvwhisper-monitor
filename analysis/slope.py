@@ -107,11 +107,15 @@ def main(argv):
         <div style="width: 49%%; float:right">
             <canvas id="histogram"></canvas>
         </div>
+        <div style="width: 49%%; float:left">
+            <canvas id="minmax"></canvas>
+        </div>
     <script>
     chartData = {
         datasets: [
             { type: 'line',
                       label: 'Estimated Change of %s per Hour', 
+                      yAxisID: 'SLOPE',
                       showLine: true,
                       cubicInterpolationMode: 'default',
                       tension: 0.2,
@@ -140,7 +144,51 @@ def main(argv):
                       label: 'Histogram of Change in %s', 
                       data: [ %s ]
                 } ] };""" % (inField, ','.join(map(str,histModel[0]))))
+
+    # Now write out the larger min/max/average dataset.. This is a separate query but simple enough
+    rows = []
+    try:
+        conn = sqlite3.connect(inFile)
+        c = conn.cursor()
+        c.execute("select date(datetime(timestamp, 'unixepoch')), min(value),max(value),avg(value) from data where fieldname='%s' group by date(datetime(timestamp, 'unixepoch')) limit 30;" % inField)
+        rows = c.fetchall()
+        conn.close()
+    except sqlite3.Error as e:
+        print(e)
+        sys.exit(2)
+        
     output.write("""
+    dataMinmax = {
+        labels: [""")
+    dataString = []
+    for row in rows:
+        dataString.append("'%s'" % (row[0]) )
+    output.write(",".join(dataString))
+    output.write("""
+        ],
+        datasets: [
+            { type: 'bar',
+              label: 'Min/Max of %s',
+              yAxisID: 'SLOPE',
+              data: [""" % inField)
+    dataString = []
+    for row in rows:
+        dataString.append("[%s, %s]" % (row[1], row[2]) )
+    output.write(",".join(dataString))
+    output.write("""
+    ] },
+    { type: 'line',
+      label: 'Average of %s',
+      yAxisID: 'SLOPE',
+      data: [""" % inField)
+    dataString = []
+    for row in rows:
+        dataString.append("%s" % row[3] )
+    output.write(",".join(dataString))
+
+    output.write("""
+    ] 
+    }] };
   const config = {
     type: "line",
     data: chartData,
@@ -219,6 +267,35 @@ def main(argv):
   var chart2 = new Chart(
     document.getElementById('histogram'),
     histConfig
+  );
+  const minmaxConfig = {
+    type: "bar",
+    data: dataMinmax,
+    options: {
+    plugins: {
+        zoom: {
+            pan: {
+                enabled: true,
+                mode: 'xy'
+            },
+            zoom: {
+                wheel: {
+                    enabled: true
+                }
+            }
+        }
+    },
+    scales: {
+        'SLOPE': {
+            position: 'left',
+            beginAtZero: false
+        }
+    }
+    }};
+
+  var chart3 = new Chart(
+    document.getElementById('minmax'),
+    minmaxConfig
   );
 </script>
 </body>
