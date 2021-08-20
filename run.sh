@@ -7,4 +7,5 @@ python3 graph.py
 # Perform Analysis
 cd analysis
 ./slope.py -i ../Engine\ battery.db -f Volts -w 10 -o /var/www/html/graph/volts.html
+./slope.py -i ../House\ battery.db -f Volts -w 10 -o /var/www/html/graph/house.html
 ./delta.py -i ../Indoor.db -w ../weather.db -o /var/www/html/graph/temp.html
