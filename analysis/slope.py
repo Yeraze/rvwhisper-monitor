@@ -150,7 +150,7 @@ def main(argv):
     try:
         conn = sqlite3.connect(inFile)
         c = conn.cursor()
-        c.execute("select date(datetime(timestamp, 'unixepoch')), min(cast(value as real)),max(cast(value as real)),avg(cast(value as real)) from data where fieldname='%s' group by date(datetime(timestamp, 'unixepoch')) limit 30;" % inField)
+        c.execute("select * from (select date(datetime(timestamp, 'unixepoch')) as timestamp, min(cast(value as real)),max(cast(value as real)),avg(cast(value as real)) from data where fieldname='%s' group by date(datetime(timestamp, 'unixepoch')) order by timestamp desc limit 30) order by timestamp;" % inField)
         rows = c.fetchall()
         conn.close()
     except sqlite3.Error as e:
