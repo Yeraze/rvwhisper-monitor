@@ -59,7 +59,18 @@ def main(argv):
 
     print("-> Fetching dashboard")
     r = httpSession.get('https://access.rvwhisper.com/%s' % config['RVWHISPER']['id'])
-    r.raise_for_status()
+    try:
+        r.raise_for_status()
+    except:
+        print(r.text)
+        p = re.compile("<title>(.*)</title>")
+        with open("status.sh", "w") as f:
+            f.write('echo "%s"\n' % (p.search(r.text).group(1)))
+            f.write("exit 2;")
+        sys.exit(-2)
+
+    with open("status.sh", "w") as f:
+        f.write("exit 0;")
 
     p = re.compile('"ajax_nonce":"(\w+)"')
     ajax_nonce = p.search(r.text).group(1)
