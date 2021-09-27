@@ -70,6 +70,7 @@ def main(argv):
         sys.exit(-2)
 
     with open("status.sh", "w") as f:
+        f.write('echo "RVWhisper is online"\n')
         f.write("exit 0;")
 
     p = re.compile('"ajax_nonce":"(\w+)"')
