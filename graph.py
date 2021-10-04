@@ -6,7 +6,7 @@ import rvWhisperUtils
 import sys, getopt
 
 
-color=['red', 'green', 'blue', 'orange', 'yellow', 'purple']
+color=['red', 'green', 'blue', 'orange', 'rgba(255,255,0,0.5)', 'purple']
 
 def usage():
     print("graph.py [-c <configFile>]")
@@ -231,6 +231,9 @@ def main(argv):
                 },
                 zoom: {
                     wheel: {
+                        enabled: true
+                    },
+                    pinch: {
                         enabled: true
                     }
                 }
