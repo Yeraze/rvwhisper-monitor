@@ -216,6 +216,9 @@ def main(argv):
             zoom: {
                 wheel: {
                     enabled: true
+                },
+                pinch: {
+                    enabled: true
                 }
             }
         },
@@ -266,6 +269,9 @@ def main(argv):
             zoom: {
                 wheel: {
                     enabled: true
+                },
+                pinch: {
+                    enabled: true
                 }
             }
         }
@@ -288,6 +294,9 @@ def main(argv):
             },
             zoom: {
                 wheel: {
+                    enabled: true
+                },
+                pinch: {
                     enabled: true
                 }
             }
