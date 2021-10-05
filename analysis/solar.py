@@ -56,15 +56,22 @@ def analyze(inFile, inWeather):
 
     print("-> Loaded %i rows of weather data" % len(rows))
 
+
+    lstLabels = list()
+    lstDaylight = list()
+    lstPeak = list()
+    lstSustained = list()
+
     for day in rows:
+
+        secDaylight = 0
+        secPeak = 0
+        secSustained = 0
+
         sunrise = int(day[1])
         sunset = int(day[2])
 
-        secondsOfDaylight = sunset - sunrise
-
-        print("Day %s : " % day[0])
-        print("  Duration of daylight: %i:%02i:%02i" % (int(secondsOfDaylight / 3600), int(secondsOfDaylight / 60) % 60, secondsOfDaylight % 60))
-
+        secDaylight = sunset - sunrise
         # So for the daylight period of the day, find the following.
         # The battery will rise up to just over 14V as the charging begins.  I'm calling this "Peak Charge", peak charging efficiency.
         # Once the battery has hit a certain point of charge, the voltage will drop and plateau in teh 13V range and hold there. I call this 
@@ -90,8 +97,7 @@ def analyze(inFile, inWeather):
             sys.exit(2)
 
         if (len(voltsOver14) > 0) and (voltsOver14[0][1] is not None):
-            secOver14 = voltsOver14[0][1] - voltsOver14[0][0]
-            print("  Duration of Peak Charge: %i:%02i:%02i ( %i %%)" % (int(secOver14 / 3600), int(secOver14 / 60) % 60, secOver14 % 60, secOver14 * 100 / secondsOfDaylight))
+            secPeak = voltsOver14[0][1] - voltsOver14[0][0]
 
             try:
                 conn = sqlite3.connect(inFile)
@@ -109,15 +115,59 @@ def analyze(inFile, inWeather):
                 sys.exit(2)
 
             if (len(voltsOver13) > 0) and (voltsOver13[0][1] is not None):
-                secOver13 = voltsOver13[0][1] - voltsOver13[0][0]
-                print("  Duration of Sustained Charge: %i:%02i:%02i ( %i %%)" % (int(secOver13 / 3600), int(secOver13 / 60) % 60, secOver13 % 60, secOver13 * 100 / secondsOfDaylight))
-            else:
-                print("  Duration of Sustained Charge: 0:00:00 ( 0 %%)")
-        else:
-            print("  Duration of Peak Charge: 0:00:00 ( 0 %%)")
-            print("  Duration of Sustained Charge: 0:00:00 ( 0 %%)")
+                secSustained = voltsOver13[0][1] - voltsOver13[0][0]
+        
+        lstLabels.append(day[0])
+        lstDaylight.append(str(secDaylight))
+        lstPeak.append(str(secPeak))
+        lstSustained.append(str(secSustained))
 
-    return ""
+    chartDaylight = """
+        { type: 'bar',
+          label: 'Hours of Daylight',
+          stack: 'Stack 0',
+          backgroundColor: 'red',
+          data: [""" + ','.join(lstDaylight) + "]}"
+    chartPeak = """
+        { type: 'bar',
+          label: 'Peak Charge',
+          stack: 'Stack 1',
+          backgroundColor: 'green',
+          data: [""" + ','.join(lstPeak) + "]}"
+    chartSustained = """
+        { type: 'bar',
+          label: 'Sustained Charge',
+          stack: 'Stack 1',
+          backgroundColor: 'blue',
+          data: [""" + ','.join(lstSustained) + "]}"
+
+    result = """<canvas id="solarChart"></canvas>
+        <script>
+        solarData = {
+            labels: [""" + ','.join(lstLabels) + "],"
+    result = result + "datasets: [" \
+            + chartDaylight + ","  \
+            + chartPeak + ","  \
+            + chartSustained + "]};"
+
+    result = result + """
+         const solarConfig = {
+            type: 'bar',
+            data: solarData,
+            options: {
+                scales: {
+                    x: { stacked: true }, 
+                    y: { stacked: true }
+                }
+            }
+          };
+          var chartSolar = new Chart(
+            document.getElementById('solarChart'),
+            solarConfig);
+        </script>"""
+
+
+    return result
 
 
 if __name__ == "__main__":
