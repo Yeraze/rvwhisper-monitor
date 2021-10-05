@@ -91,12 +91,13 @@ the last 7 days of all captured data.  This includes
 [volts.html](https://yeraze.github.io/rvwhisper-monitor/samples/volts.html) - Shows the result of the `slope.py` analysis tool, as executed
 via:
 ```
-./slope.py -i ../Engine\ battery.db -f Volts -w 10 -o /var/www/html/graph/volts.html
+./slope.py -i ../Engine\ battery.db -f Volts -w 10 -o /var/www/html/graph/volts.html -s
 ```
 This looks at the Engine Battery state and shows the variance over the last 30 days in both 
 a line chart and a histogram.  As you can see in the chart above, and in the delta line-chart, there
 is a solar panel recharging the battery every day. However, the histogram proves that despite the recharging
-I have a slight drain on the battery over time.
+I have a slight drain on the battery over time.  In the bottom right is a breakdown of the solar panel effectiveness, showing
+how well it's charging the battery vs hours of daylight in the day.
 
 # temp.html
 [temp.html](https://yeraze.github.io/rvwhisper-monitor/samples/temp.html) - Shows the result of the `delta.py` analysis tool, as executed via:
