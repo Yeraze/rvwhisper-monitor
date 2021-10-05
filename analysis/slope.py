@@ -108,13 +108,10 @@ def main(argv):
     <body>
         <div style="width: 49%%; float: left">
             <canvas id="myChart"></canvas>
-        </div>
-        <div style="width: 49%%; float:left">
             <canvas id="minmax"></canvas>
         </div>
         <div style="width: 49%%; float:right">
             <canvas id="histogram"></canvas>
-        </div>
     <script>
     chartData = {
         datasets: [
@@ -324,10 +321,9 @@ def main(argv):
 
     if (runSolar):
         print("Running solar analysis...")
-        output.write('<div style="width: 49%%; float:right">')
         output.write(solar.analyze(inFile, "../weather.db"))
-        output.write('</div>')
     output.write("""
+</div>
 </body>
 </html>""")
     output.close()

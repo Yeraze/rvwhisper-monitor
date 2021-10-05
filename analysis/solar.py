@@ -117,7 +117,7 @@ def analyze(inFile, inWeather):
             if (len(voltsOver13) > 0) and (voltsOver13[0][1] is not None):
                 secSustained = voltsOver13[0][1] - voltsOver13[0][0]
         
-        lstLabels.append(day[0])
+        lstLabels.append("'%s'" % day[0])
         lstDaylight.append(str(secDaylight))
         lstPeak.append(str(secPeak))
         lstSustained.append(str(secSustained))
@@ -126,7 +126,7 @@ def analyze(inFile, inWeather):
         { type: 'bar',
           label: 'Hours of Daylight',
           stack: 'Stack 0',
-          backgroundColor: 'red',
+          backgroundColor: 'rgba(255,0,0,0.25)',
           data: [""" + ','.join(lstDaylight) + "]}"
     chartPeak = """
         { type: 'bar',
