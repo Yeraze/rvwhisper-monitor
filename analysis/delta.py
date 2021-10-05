@@ -34,7 +34,7 @@ def main(argv):
         sys.exit(2)
 
     try:
-        opts, args = getopt.getopt(argv, "i:w:o:f:d", ["input=", "weather=", "output=", "duration="])
+        opts, args = getopt.getopt(argv, "i:w:o:f:d:", ["input=", "weather=", "output=", "duration="])
     except getopt.GetoptError as err:
         print(err)
         usage()
