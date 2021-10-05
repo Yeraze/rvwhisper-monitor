@@ -8,7 +8,7 @@ python3 graph.py >> logfile
 
 # Perform Analysis
 cd analysis
-./slope.py -i ../Engine\ battery.db -f Volts -w 10 -o /var/www/html/graph/volts.html >> ../logfile
+./slope.py -i ../Engine\ battery.db -f Volts -w 10 -o /var/www/html/graph/volts.html -s >> ../logfile
 ./slope.py -i ../House\ battery.db -f Volts -w 10 -o /var/www/html/graph/house.html >> ../logfile
 ./delta.py -i ../Indoor.db -w ../weather.db -o /var/www/html/graph/temp.html >> ../logfile
 
