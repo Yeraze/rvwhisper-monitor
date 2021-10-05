@@ -35,6 +35,11 @@ def main(argv):
         elif opt in ("-w", "--weather"):
             inWeather = arg
 
+    with open(outFile, 'w') as F:
+        F.write(analyze(inFile, inWeather))
+
+
+def analyze(inFile, inWeather):
 
     # First off load the weather data to collect Sunrise & Sunset for every day
     print("Reading weather data from '%s'..." % inWeather)
@@ -61,10 +66,13 @@ def main(argv):
         print("  Duration of daylight: %i:%02i:%02i" % (int(secondsOfDaylight / 3600), int(secondsOfDaylight / 60) % 60, secondsOfDaylight % 60))
 
         # So for the daylight period of the day, find the following.
-        # The battery will rise up to just over 14V as the charging begins.
-        # Once the battery has hit a certain point of charge, the voltage will drop and plateau in teh 13V range and hold there.
+        # The battery will rise up to just over 14V as the charging begins.  I'm calling this "Peak Charge", peak charging efficiency.
+        # Once the battery has hit a certain point of charge, the voltage will drop and plateau in teh 13V range and hold there. I call this 
+        #  "sustained" charge, as it's really just keeping the battery voltage high and offsetting any continuous drain (like the RVWhisper)
         # As the sun sets & the solar panel loses efficiency, it drops down to "normal battery levels, under 13V        
 
+        # OVer multiple days, you'll see "Peak Charge" time drop (as the battery starts the day at a higher charge every day), and the "Sustained" 
+        # charge time grow, as it's just holding the battery in a good state.
 
         try:
             conn = sqlite3.connect(inFile)
@@ -107,8 +115,9 @@ def main(argv):
                 print("  Duration of Sustained Charge: 0:00:00 ( 0 %%)")
         else:
             print("  Duration of Peak Charge: 0:00:00 ( 0 %%)")
+            print("  Duration of Sustained Charge: 0:00:00 ( 0 %%)")
 
-
+    return ""
 
 
 if __name__ == "__main__":

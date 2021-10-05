@@ -3,6 +3,7 @@
 import sys, getopt
 import numpy
 import sqlite3
+import solar
 
 def usage():
     print('slope.py -i <input SQLite DB> -o <output HTML file> -f <Field Name> [-w <Width # (Default 10)>] [-d <Duration, Default -30 days>]')
@@ -29,13 +30,14 @@ def main(argv):
     outFile = ''
     width = 10
     duration = "-30 days"
+    runSolar = False
 
     if len(argv) < 1:
         usage()
         sys.exit(2)
 
     try:
-        opts, args = getopt.getopt(argv, "i:o:f:w:d:", ["input=", "output=", "field=", "width=", "duration="])
+        opts, args = getopt.getopt(argv, "i:o:f:w:d:s", ["input=", "output=", "field=", "width=", "duration=", "solar"])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -53,6 +55,9 @@ def main(argv):
             width = int(arg)
         elif opt in ("-d", "--duration"):
             duration = arg
+        elif opt in ("-s", "--solar"):
+            runSolar = True
+        
 
     print("Reading '%s' from '%s" % (inField, inFile))
     print("Calculating over %i samples, and writing to  '%s'" % (width, outFile))
@@ -315,9 +320,15 @@ def main(argv):
     minmaxConfig
   );
 </script>
+""")
+
+    if (runSolar):
+        output.write(solar.analyze(inFile, "../weather.db"))
+    output.write("""
 </body>
 </html>""")
     output.close()
+
 
 
 # select date(datetime(timestamp, 'unixepoch')), min(value),max(value) from data where fieldname='Volts' group by date(datetime(timestamp, 'unixepoch'));
