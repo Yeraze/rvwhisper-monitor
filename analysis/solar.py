@@ -52,7 +52,27 @@ def main(argv):
     print("-> Loaded %i rows of weather data" % len(rows))
 
     for day in rows:
-        print("Day %s : " % day[0])
+        sunrise = int(day[1])
+        sunset = int(day[2])
 
+        secondsOfDaylight = sunset - sunrise
+
+        print("Day %s : " % day[0])
+        print("  Duration of daylight: %i:%02i:%02i" % (int(secondsOfDaylight / 3600), int(secondsOfDaylight / 60) % 60, secondsOfDaylight % 60))
+        
+        try:
+            conn = sqlite3.connect(inFile)
+            c = conn.cursor()
+            c.execute("""select timestamp, value from data where fieldname = 'Volts' 
+                                                    and timestamp > %s 
+                                                    and timestamp < %s 
+                            order by timestamp""" % (sunrise, sunset))
+            volts = c.fetchall() 
+            conn.close()
+
+        except sqlite3.Error as e:
+            print("Reading %s:" % inFile)
+            print(e)
+            sys.exit(2)
 if __name__ == "__main__":
     main(sys.argv[1:])
