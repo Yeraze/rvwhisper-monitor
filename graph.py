@@ -235,7 +235,8 @@ def main(argv):
                     },
                     pinch: {
                         enabled: true
-                    }
+                    },
+                    mode: 'x'
                 }
             },
             decimation: {
