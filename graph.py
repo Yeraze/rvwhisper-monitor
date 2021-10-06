@@ -15,7 +15,7 @@ def usage():
 def main(argv):
     configFile = 'rvwhisper.ini'
     try:
-        opts, args = getopt.getopt(argv, "c", ["config="])
+        opts, args = getopt.getopt(argv, "c:", ["config="])
     except getopt.GetoptError as err:
         print(err)
         usage()
