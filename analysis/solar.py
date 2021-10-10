@@ -36,7 +36,16 @@ def main(argv):
             inWeather = arg
 
     with open(outFile, 'w') as F:
+        F.write("""<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.1.1"></script>
+        <title>RVWhisper Solar Graph</title>
+    </head>
+    <body>""");
         F.write(analyze(inFile, inWeather))
+        F.write("</body></html>")
 
 
 def analyze(inFile, inWeather):
