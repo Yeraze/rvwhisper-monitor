@@ -160,6 +160,24 @@ def analyze(inFile, inWeather):
             + chartSustained + "]};"
 
     result = result + """
+         function SecToTime(time) {
+                totalSeconds = parseInt(time);
+                _sec = totalSeconds % 60;
+                _min = parseInt(totalSeconds / 60) % 60;
+                _hour = parseInt(totalSeconds / 3600);
+                var S =  _hour;
+                if (_min < 10) {
+                    S = S + ":0" +  _min;
+                } else {
+                    S = S + ":" + _min;
+                }
+                if (_sec < 10) {
+                    S = S + ":0" + _sec;
+                } else {
+                    S = S + ":" + _sec;
+                }
+                return S;
+         }
          const solarConfig = {
             type: 'bar',
             data: solarData,
@@ -169,22 +187,18 @@ def analyze(inFile, inWeather):
                     y: { stacked: true,
                         ticks: {
                             callback: function(label, index, labels) {
-                                totalSeconds = parseInt(label);
-                                _sec = totalSeconds % 60;
-                                _min = parseInt(totalSeconds / 60) % 60;
-                                _hour = parseInt(totalSeconds / 3600);
-                                var S =  _hour;
-                                if (_min < 10) {
-                                    S = S + ":0" +  _min;
-                                } else {
-                                    S = S + ":" + _min;
-                                }
-                                if (_sec < 10) {
-                                    S = S + ":0" + _sec;
-                                } else {
-                                    S = S + ":" + _sec;
-                                }
-                                return S;
+                                return SecToTime(label);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip:  {
+                        callbacks: {
+                            label: function(context) {
+                                var label = context.dataset.label || '';
+                                label += ": " + SecToTime(context.parsed.y);
+                                return label;
                             }
                         }
                     }
