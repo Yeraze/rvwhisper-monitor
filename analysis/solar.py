@@ -166,7 +166,28 @@ def analyze(inFile, inWeather):
             options: {
                 scales: {
                     x: { stacked: true }, 
-                    y: { stacked: true }
+                    y: { stacked: true,
+                        ticks: {
+                            callback: function(label, index, labels) {
+                                totalSeconds = parseInt(label);
+                                _sec = totalSeconds % 60;
+                                _min = parseInt(totalSeconds / 60) % 60;
+                                _hour = parseInt(totalSeconds / 3600);
+                                var S =  _hour;
+                                if (_min < 10) {
+                                    S = S + ":0" +  _min;
+                                } else {
+                                    S = S + ":" + _min;
+                                }
+                                if (_sec < 10) {
+                                    S = S + ":0" + _sec;
+                                } else {
+                                    S = S + ":" + _sec;
+                                }
+                                return S;
+                            }
+                        }
+                    }
                 }
             }
           };
